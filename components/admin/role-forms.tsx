@@ -188,7 +188,7 @@ export function RolesAndPermissionsList({ roles, permissions }: { roles: Role[];
       {roles.map((role) => {
         const open = openIds.has(role.id);
         const granted = role.name === "Admin" ? permissions.length : role.permissionIds.length;
-        const panelId = ole-panel-;
+        const panelId = `role-panel-${role.id}`;
         return (
           <section key={role.id} className="rounded-lg border bg-card text-card-foreground">
             <header className="flex items-center gap-2 px-3 py-2.5">
