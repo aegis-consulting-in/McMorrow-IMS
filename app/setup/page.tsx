@@ -21,7 +21,7 @@ export default function SetupPage() {
           </span>
           <div>
             <h1 className="font-heading text-lg font-semibold">Supabase is not configured</h1>
-            <p className="text-sm text-muted-foreground">SkillHub needs a Supabase project before it can start.</p>
+            <p className="text-sm text-muted-foreground">McMorrow IMS needs a Supabase project before it can start.</p>
           </div>
         </div>
 

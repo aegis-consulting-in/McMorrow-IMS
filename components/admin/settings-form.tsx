@@ -33,6 +33,16 @@ export function SystemSettingsForm({ defaults }: { defaults: Values }) {
         <FormField label="Organisation" htmlFor="organisation" required error={err("organisation")}>
           <Input id="organisation" {...form.register("organisation")} />
         </FormField>
+        <FormField
+          label="Reminder email: From"
+          htmlFor="reminderFromEmail"
+          required
+          error={err("reminderFromEmail")}
+          hint="Sender address shown on every reminder email."
+          className="md:col-span-2"
+        >
+          <Input id="reminderFromEmail" type="email" placeholder="no-reply@example.com" {...form.register("reminderFromEmail")} />
+        </FormField>
         <FormField label="Equipment reminder email" htmlFor="equipmentReminderEmail" required error={err("equipmentReminderEmail")}>
           <Input id="equipmentReminderEmail" type="email" {...form.register("equipmentReminderEmail")} />
         </FormField>
@@ -40,14 +50,14 @@ export function SystemSettingsForm({ defaults }: { defaults: Values }) {
           <Input id="supplierReminderEmail" type="email" {...form.register("supplierReminderEmail")} />
         </FormField>
         <FormField
-          label="Training reminder days"
-          htmlFor="trainingDueDays"
+          label="Reminder lead days"
+          htmlFor="reminderLeadDays"
           required
-          error={err("trainingDueDays")}
-          hint="Comma-separated days before due date, e.g. 14, 7"
+          error={err("reminderLeadDays")}
+          hint="Applies to all reminders (training, equipment, supplier). Comma-separated days before the due date, saved in descending order, e.g. 14, 7"
           className="md:col-span-2"
         >
-          <Input id="trainingDueDays" {...form.register("trainingDueDays")} />
+          <Input id="reminderLeadDays" {...form.register("reminderLeadDays")} />
         </FormField>
       </FormGrid>
       <div>

@@ -5,7 +5,7 @@ import { EMPLOYEE_MODULE, MODULES } from "@/lib/navigation";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const [user, settings] = await Promise.all([requireUser(), getPublicSettings()]);
-  const appName = typeof settings["app.name"] === "string" ? (settings["app.name"] as string) : "SkillHub";
+  const appName = typeof settings["app.name"] === "string" ? (settings["app.name"] as string) : "McMorrow IMS";
 
   const visibleModules = MODULES.filter((m) => m.permissions.length === 0 || user.canAny(m.permissions)).map((m) => ({
     key: m.key,

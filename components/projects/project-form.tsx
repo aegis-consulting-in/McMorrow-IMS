@@ -28,20 +28,25 @@ const emptyMilestone = { id: "", name: "", startDate: "", endDate: "", status: "
 export function ProjectForm({
   project,
   employees,
+  sites,
   milestones = [],
 }: {
   project?: ProjectRow;
   employees: { id: string; first_name: string; last_name: string; employee_code: string }[];
+  /** Plant list from Admin → System Settings. Inactive sites are only offered if already on the project. */
+  sites: { id: string; name: string; code: string | null; is_active: boolean }[];
   milestones?: Pick<ProjectMilestoneRow, "id" | "name" | "start_date" | "end_date" | "status">[];
 }) {
   const router = useRouter();
   const isEdit = Boolean(project);
+  const availableSites = sites.filter((s) => s.is_active || s.id === project?.site_id);
   const form = useForm<Values>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       code: project?.code ?? "",
       name: project?.name ?? "",
       description: project?.description ?? "",
+      siteId: project?.site_id ?? "",
       managerId: project?.manager_id ?? "",
       actualEndDate: project?.actual_end_date ?? "",
       status: project?.status ?? "planning",
@@ -83,6 +88,24 @@ export function ProjectForm({
         </FormField>
         <FormField label="Project name" htmlFor="name" required error={err("name")}>
           <Input id="name" {...form.register("name")} />
+        </FormField>
+        <FormField
+          label="Plant location"
+          htmlFor="siteId"
+          required
+          error={err("siteId")}
+          hint={availableSites.length ? undefined : "No sites defined yet. Add them in Admin → System Settings → Sites."}
+        >
+          <NativeSelect id="siteId" {...form.register("siteId")}>
+            <option value="">— Select plant location —</option>
+            {availableSites.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+                {s.code ? ` (${s.code})` : ""}
+                {s.is_active ? "" : " — inactive"}
+              </option>
+            ))}
+          </NativeSelect>
         </FormField>
         <FormField label="Project manager" htmlFor="managerId" error={err("managerId")}>
           <NativeSelect id="managerId" {...form.register("managerId")}>

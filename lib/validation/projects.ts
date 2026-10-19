@@ -27,6 +27,7 @@ export const projectSchema = z.object({
   code: requiredText("Project code", 30),
   name: requiredText("Project name", 200),
   description: optionalText(5000),
+  siteId: z.string().trim().min(1, "Select a plant location.").pipe(uuid),
   managerId: optionalUuid,
   actualEndDate: optionalDate,
   status: z.enum(PROJECT_STATUSES).default("planning"),

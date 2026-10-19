@@ -1,5 +1,5 @@
 -- =============================================================================
--- SkillHub QMS — Core schema
+-- McMorrow IMS — Core schema
 -- Migration 1 of 3: extensions, enums, tables, indexes, triggers
 -- =============================================================================
 

@@ -1,5 +1,5 @@
 /**
- * Database types for the SkillHub schema.
+ * Database types for the McMorrow IMS schema.
  *
  * Hand-maintained to mirror supabase/migrations/*.sql. Once a Supabase project
  * exists you can regenerate this file from the live schema with:
@@ -134,12 +134,29 @@ export type TrainingAssignmentRow = Timestamps & {
   notes: string | null;
 };
 
+export type SiteRow = Timestamps & {
+  id: string;
+  name: string;
+  code: string | null;
+  address: string | null;
+  is_active: boolean;
+};
+
+export type ProjectRoleRow = Timestamps & {
+  id: string;
+  name: string;
+  description: string | null;
+  sort_order: number;
+  is_active: boolean;
+};
+
 export type ProjectRow = Timestamps & {
   id: string;
   code: string;
   name: string;
   description: string | null;
   manager_id: string | null;
+  site_id: string | null;
   start_date: string | null;
   expected_end_date: string | null;
   actual_end_date: string | null;
@@ -322,6 +339,8 @@ export type Database = {
       >;
       departments: Table<DepartmentRow, Optional<DepartmentRow, Generated | "code" | "description" | "is_active">>;
       job_titles: Table<JobTitleRow, Optional<JobTitleRow, Generated | "description" | "is_active">>;
+      sites: Table<SiteRow, Optional<SiteRow, Generated | "code" | "address" | "is_active">>;
+      project_roles: Table<ProjectRoleRow, Optional<ProjectRoleRow, Generated | "description" | "sort_order" | "is_active">>;
       employees: Table<
         EmployeeRow,
         Optional<
@@ -397,6 +416,7 @@ export type Database = {
           | Generated
           | "description"
           | "manager_id"
+          | "site_id"
           | "start_date"
           | "expected_end_date"
           | "actual_end_date"
@@ -408,6 +428,7 @@ export type Database = {
         >,
         [
           { foreignKeyName: "projects_manager_id_fkey"; columns: ["manager_id"]; isOneToOne: false; referencedRelation: "employees"; referencedColumns: ["id"] },
+          { foreignKeyName: "projects_site_id_fkey"; columns: ["site_id"]; isOneToOne: false; referencedRelation: "sites"; referencedColumns: ["id"] },
           { foreignKeyName: "project_milestones_project_id_fkey"; columns: ["id"]; isOneToOne: false; referencedRelation: "project_milestones"; referencedColumns: ["project_id"] },
         ]
       >;

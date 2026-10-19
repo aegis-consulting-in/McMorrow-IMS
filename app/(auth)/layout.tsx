@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           <span className="flex size-9 items-center justify-center rounded-md bg-white/15">
             <ShieldCheckIcon className="size-5" />
           </span>
-          <span className="font-heading text-lg font-semibold tracking-tight">SkillHub</span>
+          <span className="font-heading text-lg font-semibold tracking-tight">McMorrow IMS</span>
         </div>
         <div>
           <p className="text-xs font-medium tracking-[0.14em] text-white/60 uppercase">Quality Management</p>
@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
       <main className="flex items-center justify-center bg-background p-6 sm:p-10">
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
-            <p className="font-heading text-lg font-semibold">SkillHub</p>
+            <p className="font-heading text-lg font-semibold">McMorrow IMS</p>
             <p className="text-sm text-muted-foreground">Quality Management System</p>
           </div>
           {children}

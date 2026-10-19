@@ -1,5 +1,5 @@
 -- =============================================================================
--- SkillHub QMS — Storage bucket and object policies
+-- McMorrow IMS — Storage bucket and object policies
 -- Migration 3 of 3
 --
 -- One PRIVATE bucket ("documents"). Objects are keyed as

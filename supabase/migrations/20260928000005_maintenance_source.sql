@@ -1,5 +1,5 @@
 -- =============================================================================
--- SkillHub QMS — Preventive maintenance Internal / External source
+-- McMorrow IMS — Preventive maintenance Internal / External source
 -- Migration 5
 -- =============================================================================
 

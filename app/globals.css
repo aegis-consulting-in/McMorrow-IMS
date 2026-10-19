@@ -41,7 +41,7 @@
   --color-foreground: var(--foreground);
   --color-background: var(--background);
 
-  /* SkillHub brand tokens (from qms_mock screenshots) */
+  /* McMorrow IMS brand tokens (from qms_mock screenshots) */
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-brand-dark: var(--brand-dark);

@@ -52,15 +52,33 @@ export const updateJobTitleSchema = jobTitleSchema.extend({ id: uuid });
 export const systemSettingsSchema = z.object({
   appName: requiredText("Application name", 60),
   organisation: requiredText("Organisation", 120),
+  reminderFromEmail: email,
   equipmentReminderEmail: email,
   supplierReminderEmail: email,
-  trainingDueDays: z
+  /** Applies to every reminder (training, equipment, supplier). Saved in descending order. */
+  reminderLeadDays: z
     .string()
     .trim()
-    .min(1, "Enter at least one reminder day.")
+    .min(1, "Enter at least one reminder lead day.")
     .refine((s) => s.split(",").every((x) => /^\s*\d{1,3}\s*$/.test(x)), "Enter comma-separated numbers, e.g. 14, 7"),
 });
 export type SystemSettingsInput = z.infer<typeof systemSettingsSchema>;
+
+export const siteSchema = z.object({
+  name: requiredText("Site name", 120),
+  code: optionalText(20),
+  address: optionalText(500),
+  isActive: z.boolean().default(true),
+});
+export const updateSiteSchema = siteSchema.extend({ id: uuid });
+
+export const projectRoleSchema = z.object({
+  name: requiredText("Project role", 80),
+  description: optionalText(500),
+  sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
+  isActive: z.boolean().default(true),
+});
+export const updateProjectRoleSchema = projectRoleSchema.extend({ id: uuid });
 
 export const auditLogFilterSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

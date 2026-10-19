@@ -22,11 +22,14 @@ export function ProjectMembers({
   projectId,
   members,
   employees,
+  projectRoles = [],
   canManage,
 }: {
   projectId: string;
   members: Member[];
   employees: { id: string; first_name: string; last_name: string; employee_code: string }[];
+  /** Active roles from Admin → System Settings → Project roles. */
+  projectRoles?: { id: string; name: string }[];
   canManage: boolean;
 }) {
   const router = useRouter();
@@ -70,7 +73,18 @@ export function ProjectMembers({
               </option>
             ))}
           </NativeSelect>
-          <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role in project (optional)" className="sm:w-56" />
+          {projectRoles.length ? (
+            <NativeSelect value={role} onChange={(e) => setRole(e.target.value)} className="sm:w-56" aria-label="Role in project">
+              <option value="">Role in project (optional)</option>
+              {projectRoles.map((r) => (
+                <option key={r.id} value={r.name}>
+                  {r.name}
+                </option>
+              ))}
+            </NativeSelect>
+          ) : (
+            <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role in project (optional)" className="sm:w-56" />
+          )}
           <Button type="submit" disabled={!employeeId || isPending}>
             {isPending ? <Loader2Icon className="animate-spin" /> : <UserPlusIcon />} Add
           </Button>

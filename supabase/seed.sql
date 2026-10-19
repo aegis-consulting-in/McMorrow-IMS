@@ -1,5 +1,5 @@
 -- =============================================================================
--- SkillHub QMS — Master data seed (idempotent)
+-- McMorrow IMS — Master data seed (idempotent)
 --
 -- Run AFTER the migrations. This seeds everything that does not depend on an
 -- auth user: permissions, roles, role→permission grants, departments, job
@@ -186,11 +186,12 @@ on conflict (name) do update set sort_order = excluded.sort_order, is_default = 
 -- System settings
 -- -----------------------------------------------------------------------------
 insert into public.system_settings (key, value, description, is_public) values
-  ('app.name', '"SkillHub"', 'Application display name', true),
+  ('app.name', '"McMorrow IMS"', 'Application display name', true),
   ('app.organisation', '"Northwind Labs"', 'Organisation name shown in headers and exports', true),
   ('reminders.equipment_email', '"maintenance@example.com"', 'Mailbox that receives preventive maintenance reminders', false),
   ('reminders.supplier_email', '"procurement@example.com"', 'Mailbox that receives supplier review reminders', false),
-  ('reminders.training_due_days', '[14, 7]', 'Days before a training due date at which reminders are raised', false),
+  ('reminders.from_email', '"no-reply@example.com"', 'Sender (From) address used on reminder emails', false),
+  ('reminders.lead_days', '[14, 7]', 'Days before a due date at which reminders are raised (training, equipment, supplier)', false),
   ('documents.max_file_size_mb', '25', 'Maximum upload size per file (must not exceed the bucket limit)', true),
   ('documents.allowed_extensions', '["pdf","doc","docx","xls","xlsx","ppt","pptx","txt","csv","png","jpg","jpeg","webp","gif"]', 'File extensions accepted by the upload component', true)
 on conflict (key) do update

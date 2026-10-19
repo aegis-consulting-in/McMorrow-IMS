@@ -12,14 +12,18 @@ import {
   createUserSchema,
   departmentSchema,
   jobTitleSchema,
+  projectRoleSchema,
   roleSchema,
   setRolePermissionsSchema,
   setUserActiveSchema,
   setUserRolesSchema,
+  siteSchema,
   systemSettingsSchema,
   updateDepartmentSchema,
   updateJobTitleSchema,
+  updateProjectRoleSchema,
   updateRoleSchema,
+  updateSiteSchema,
 } from "@/lib/validation/admin";
 import { trainingConfigItemSchema } from "@/lib/validation/training";
 import { runAction, type ActionResult } from "./result";
@@ -205,7 +209,6 @@ export async function setRolePermissionsAction(input: unknown): Promise<ActionRe
     }
     await logAction(supabase, "admin.role_permissions_set", { type: "role", id: roleId }, { count: permissionIds.length });
     revalidatePath("/admin/roles");
-    revalidatePath("/admin/permissions");
     return undefined;
   });
 }
@@ -297,6 +300,94 @@ export async function deleteJobTitleAction(input: unknown): Promise<ActionResult
   });
 }
 
+// ------------------------------------------------------------------ sites
+export async function createSiteAction(input: unknown): Promise<ActionResult<{ id: string }>> {
+  return runAction(siteSchema, input, async (data) => {
+    await requirePermission(PERMISSIONS.admin.settings);
+    const supabase = await createClient();
+    const { data: row, error } = await supabase
+      .from("sites")
+      .insert({ name: data.name, code: data.code ?? null, address: data.address ?? null, is_active: data.isActive })
+      .select("id")
+      .single();
+    if (error) throw error;
+    await logAction(supabase, "admin.site_created", { type: "site", id: row.id }, { name: data.name });
+    revalidatePath("/admin/settings");
+    return { id: row.id };
+  });
+}
+
+export async function updateSiteAction(input: unknown): Promise<ActionResult> {
+  return runAction(updateSiteSchema, input, async ({ id, ...data }) => {
+    await requirePermission(PERMISSIONS.admin.settings);
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("sites")
+      .update({ name: data.name, code: data.code ?? null, address: data.address ?? null, is_active: data.isActive })
+      .eq("id", id);
+    if (error) throw error;
+    await logAction(supabase, "admin.site_updated", { type: "site", id });
+    revalidatePath("/admin/settings");
+    return undefined;
+  });
+}
+
+export async function deleteSiteAction(input: unknown): Promise<ActionResult> {
+  return runAction(idSchema, input, async ({ id }) => {
+    await requirePermission(PERMISSIONS.admin.settings);
+    const supabase = await createClient();
+    const { error } = await supabase.from("sites").delete().eq("id", id);
+    if (error) throw error;
+    await logAction(supabase, "admin.site_deleted", { type: "site", id });
+    revalidatePath("/admin/settings");
+    return undefined;
+  });
+}
+
+// ------------------------------------------------------------ project roles
+export async function createProjectRoleAction(input: unknown): Promise<ActionResult<{ id: string }>> {
+  return runAction(projectRoleSchema, input, async (data) => {
+    await requirePermission(PERMISSIONS.admin.settings);
+    const supabase = await createClient();
+    const { data: row, error } = await supabase
+      .from("project_roles")
+      .insert({ name: data.name, description: data.description ?? null, sort_order: data.sortOrder, is_active: data.isActive })
+      .select("id")
+      .single();
+    if (error) throw error;
+    await logAction(supabase, "admin.project_role_created", { type: "project_role", id: row.id }, { name: data.name });
+    revalidatePath("/admin/settings");
+    return { id: row.id };
+  });
+}
+
+export async function updateProjectRoleAction(input: unknown): Promise<ActionResult> {
+  return runAction(updateProjectRoleSchema, input, async ({ id, ...data }) => {
+    await requirePermission(PERMISSIONS.admin.settings);
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("project_roles")
+      .update({ name: data.name, description: data.description ?? null, sort_order: data.sortOrder, is_active: data.isActive })
+      .eq("id", id);
+    if (error) throw error;
+    await logAction(supabase, "admin.project_role_updated", { type: "project_role", id });
+    revalidatePath("/admin/settings");
+    return undefined;
+  });
+}
+
+export async function deleteProjectRoleAction(input: unknown): Promise<ActionResult> {
+  return runAction(idSchema, input, async ({ id }) => {
+    await requirePermission(PERMISSIONS.admin.settings);
+    const supabase = await createClient();
+    const { error } = await supabase.from("project_roles").delete().eq("id", id);
+    if (error) throw error;
+    await logAction(supabase, "admin.project_role_deleted", { type: "project_role", id });
+    revalidatePath("/admin/settings");
+    return undefined;
+  });
+}
+
 // ------------------------------------------------------- training config
 type ConfigTable = "training_levels" | "training_statuses";
 
@@ -354,16 +445,22 @@ export async function saveSystemSettingsAction(input: unknown): Promise<ActionRe
   return runAction(systemSettingsSchema, input, async (data) => {
     const actor = await requirePermission(PERMISSIONS.admin.settings);
     const supabase = await createClient();
-    const dueDays = data.trainingDueDays
-      .split(",")
-      .map((x) => Number(x.trim()))
-      .filter((n) => Number.isFinite(n));
+    // Lead days apply to every reminder; store unique values, largest first.
+    const leadDays = [
+      ...new Set(
+        data.reminderLeadDays
+          .split(",")
+          .map((x) => Number(x.trim()))
+          .filter((n) => Number.isFinite(n)),
+      ),
+    ].sort((a, b) => b - a);
     const rows = [
       { key: "app.name", value: data.appName, is_public: true },
       { key: "app.organisation", value: data.organisation, is_public: true },
+      { key: "reminders.from_email", value: data.reminderFromEmail, is_public: false },
       { key: "reminders.equipment_email", value: data.equipmentReminderEmail, is_public: false },
       { key: "reminders.supplier_email", value: data.supplierReminderEmail, is_public: false },
-      { key: "reminders.training_due_days", value: dueDays, is_public: false },
+      { key: "reminders.lead_days", value: leadDays, is_public: false },
     ].map((r) => ({ ...r, updated_by: actor.id, updated_at: new Date().toISOString() }));
 
     const { error } = await supabase.from("system_settings").upsert(rows, { onConflict: "key" });

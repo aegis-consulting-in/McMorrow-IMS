@@ -16,7 +16,7 @@ loadEnvConfig(process.cwd());
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD ?? "SkillHub123!";
+const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD ?? "McMorrowIMS123!";
 
 if (!URL || !SERVICE) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local");
@@ -104,7 +104,7 @@ async function insertAssignment(
 }
 
 async function seed() {
-  console.log("Seeding SkillHub demo data…");
+  console.log("Seeding McMorrow IMS demo data…");
 
   const departments = await mapBy("departments");
   const titles = await mapBy("job_titles");
@@ -113,14 +113,14 @@ async function seed() {
   const statuses = await mapBy("training_statuses");
 
   const users = {
-    admin: await upsertUser("admin@skillhub.local", "Aisha Rahman"),
-    manager: await upsertUser("manager@skillhub.local", "James Okonkwo"),
-    employee: await upsertUser("employee@skillhub.local", "Priya Nair"),
-    auditor: await upsertUser("auditor@skillhub.local", "Elena Rossi"),
-    training: await upsertUser("training@skillhub.local", "Tom Becker"),
-    projects: await upsertUser("projects@skillhub.local", "Sofia Alvarez"),
-    suppliers: await upsertUser("suppliers@skillhub.local", "Chen Wei"),
-    maintenance: await upsertUser("maintenance@skillhub.local", "Noah Patel"),
+    admin: await upsertUser("admin@mcmorrow-ims.local", "Aisha Rahman"),
+    manager: await upsertUser("manager@mcmorrow-ims.local", "James Okonkwo"),
+    employee: await upsertUser("employee@mcmorrow-ims.local", "Priya Nair"),
+    auditor: await upsertUser("auditor@mcmorrow-ims.local", "Elena Rossi"),
+    training: await upsertUser("training@mcmorrow-ims.local", "Tom Becker"),
+    projects: await upsertUser("projects@mcmorrow-ims.local", "Sofia Alvarez"),
+    suppliers: await upsertUser("suppliers@mcmorrow-ims.local", "Chen Wei"),
+    maintenance: await upsertUser("maintenance@mcmorrow-ims.local", "Noah Patel"),
   };
 
   await assignRole(users.admin, roles.Admin);
@@ -138,7 +138,7 @@ async function seed() {
     user_id: users.admin,
     first_name: "Aisha",
     last_name: "Rahman",
-    email: "admin@skillhub.local",
+    email: "admin@mcmorrow-ims.local",
     phone: "+1 555 0101",
     department_id: departments["Human Resources"],
     job_title_id: titles["HR Manager"],
@@ -150,7 +150,7 @@ async function seed() {
     user_id: users.manager,
     first_name: "James",
     last_name: "Okonkwo",
-    email: "manager@skillhub.local",
+    email: "manager@mcmorrow-ims.local",
     phone: "+1 555 0102",
     department_id: departments.Production,
     job_title_id: titles["Production Supervisor"],
@@ -163,7 +163,7 @@ async function seed() {
     user_id: users.training,
     first_name: "Tom",
     last_name: "Becker",
-    email: "training@skillhub.local",
+    email: "training@mcmorrow-ims.local",
     department_id: departments["Human Resources"],
     job_title_id: titles["HR Executive"],
     manager_id: emp.admin,
@@ -175,7 +175,7 @@ async function seed() {
     user_id: users.employee,
     first_name: "Priya",
     last_name: "Nair",
-    email: "employee@skillhub.local",
+    email: "employee@mcmorrow-ims.local",
     department_id: departments.Production,
     job_title_id: titles["Line Operator"],
     manager_id: emp.manager,
@@ -187,7 +187,7 @@ async function seed() {
     user_id: users.auditor,
     first_name: "Elena",
     last_name: "Rossi",
-    email: "auditor@skillhub.local",
+    email: "auditor@mcmorrow-ims.local",
     department_id: departments["Quality Assurance"],
     job_title_id: titles["Internal Auditor"],
     manager_id: emp.admin,
@@ -199,7 +199,7 @@ async function seed() {
     user_id: users.projects,
     first_name: "Sofia",
     last_name: "Alvarez",
-    email: "projects@skillhub.local",
+    email: "projects@mcmorrow-ims.local",
     department_id: departments.Operations,
     job_title_id: titles["Project Manager"],
     manager_id: emp.admin,
@@ -211,7 +211,7 @@ async function seed() {
     user_id: users.suppliers,
     first_name: "Chen",
     last_name: "Wei",
-    email: "suppliers@skillhub.local",
+    email: "suppliers@mcmorrow-ims.local",
     department_id: departments.Procurement,
     job_title_id: titles["Procurement Lead"],
     manager_id: emp.admin,
@@ -223,7 +223,7 @@ async function seed() {
     user_id: users.maintenance,
     first_name: "Noah",
     last_name: "Patel",
-    email: "maintenance@skillhub.local",
+    email: "maintenance@mcmorrow-ims.local",
     department_id: departments.Engineering,
     job_title_id: titles["Maintenance Engineer"],
     manager_id: emp.admin,
@@ -234,7 +234,7 @@ async function seed() {
     employee_code: "EMP-009",
     first_name: "Luis",
     last_name: "Garcia",
-    email: "luis.garcia@skillhub.local",
+    email: "luis.garcia@mcmorrow-ims.local",
     department_id: departments.Production,
     job_title_id: titles["Line Operator"],
     manager_id: emp.manager,
@@ -452,14 +452,14 @@ async function seed() {
 
   console.log(`
 Demo users (password: ${DEMO_PASSWORD})
-  admin@skillhub.local          Admin (Managing Director)
-  manager@skillhub.local        Manager (Production Supervisor)
-  employee@skillhub.local       Employee (reports to James)
-  auditor@skillhub.local        Quality & Compliance
-  training@skillhub.local       Finance & Administration
-  projects@skillhub.local       Construction Management
-  suppliers@skillhub.local      Finance & Administration
-  maintenance@skillhub.local    Finance & Administration
+  admin@mcmorrow-ims.local          Admin (Managing Director)
+  manager@mcmorrow-ims.local        Manager (Production Supervisor)
+  employee@mcmorrow-ims.local       Employee (reports to James)
+  auditor@mcmorrow-ims.local        Quality & Compliance
+  training@mcmorrow-ims.local       Finance & Administration
+  projects@mcmorrow-ims.local       Construction Management
+  suppliers@mcmorrow-ims.local      Finance & Administration
+  maintenance@mcmorrow-ims.local    Finance & Administration
 `);
 }
 

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { ChevronDownIcon, ChevronRightIcon, Loader2Icon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import type { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -157,6 +157,71 @@ export function RolePermissionsForm({ role, permissions }: { role: Role; permiss
           Save permissions
         </Button>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Every role as a collapsible card: header shows the role + quick actions,
+ * the body holds the permission checklist. Collapsed by default so the page
+ * stays scannable; panels stay mounted so unsaved ticks survive a collapse.
+ */
+export function RolesAndPermissionsList({ roles, permissions }: { roles: Role[]; permissions: Permission[] }) {
+  const [openIds, setOpenIds] = useState<Set<string>>(() => new Set());
+  const allOpen = roles.length > 0 && openIds.size === roles.length;
+
+  const toggle = (id: string) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex justify-end">
+        <Button type="button" variant="outline" size="sm" onClick={() => setOpenIds(allOpen ? new Set() : new Set(roles.map((r) => r.id)))}>
+          {allOpen ? "Collapse all" : "Expand all"}
+        </Button>
+      </div>
+      {roles.map((role) => {
+        const open = openIds.has(role.id);
+        const granted = role.name === "Admin" ? permissions.length : role.permissionIds.length;
+        const panelId = ole-panel-;
+        return (
+          <section key={role.id} className="rounded-lg border bg-card text-card-foreground">
+            <header className="flex items-center gap-2 px-3 py-2.5">
+              <button
+                type="button"
+                onClick={() => toggle(role.id)}
+                aria-expanded={open}
+                aria-controls={panelId}
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {open ? <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" /> : <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />}
+                <span className="min-w-0">
+                  <span className="flex flex-wrap items-center gap-2 font-heading text-sm font-semibold">
+                    {role.name}
+                    {role.is_system ? <span className="rounded bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">System</span> : null}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {role.userCount} user{role.userCount === 1 ? "" : "s"} · {granted} of {permissions.length} permissions
+                    </span>
+                  </span>
+                  {role.description ? <span className="block truncate text-xs text-muted-foreground">{role.description}</span> : null}
+                </span>
+              </button>
+              <div className="flex shrink-0 items-center gap-1">
+                <RoleDialog role={role} />
+                <DeleteRoleButton id={role.id} name={role.name} isSystem={role.is_system} userCount={role.userCount} />
+              </div>
+            </header>
+            <div id={panelId} hidden={!open} className="border-t p-4">
+              <RolePermissionsForm role={role} permissions={permissions} />
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

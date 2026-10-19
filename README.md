@@ -1,4 +1,4 @@
-# SkillHub / QMS
+# McMorrow IMS
 
 Internal Quality Management System: training, employees, projects, suppliers, preventive maintenance, audits, documents and administration.
 
@@ -35,14 +35,14 @@ After you run migrations, `supabase/seed.sql` and `npm run seed`:
 
 | Email | Role | Password |
 | --- | --- | --- |
-| `admin@skillhub.local` | Admin | `SkillHub123!` |
-| `manager@skillhub.local` | Manager | `SkillHub123!` |
-| `employee@skillhub.local` | Employee | `SkillHub123!` |
-| `auditor@skillhub.local` | Quality & Compliance | `SkillHub123!` |
-| `training@skillhub.local` | Finance & Administration | `SkillHub123!` |
-| `projects@skillhub.local` | Construction Management | `SkillHub123!` |
-| `suppliers@skillhub.local` | Finance & Administration | `SkillHub123!` |
-| `maintenance@skillhub.local` | Finance & Administration | `SkillHub123!` |
+| `admin@mcmorrow-ims.local` | Admin | `McMorrowIMS123!` |
+| `manager@mcmorrow-ims.local` | Manager | `McMorrowIMS123!` |
+| `employee@mcmorrow-ims.local` | Employee | `McMorrowIMS123!` |
+| `auditor@mcmorrow-ims.local` | Quality & Compliance | `McMorrowIMS123!` |
+| `training@mcmorrow-ims.local` | Finance & Administration | `McMorrowIMS123!` |
+| `projects@mcmorrow-ims.local` | Construction Management | `McMorrowIMS123!` |
+| `suppliers@mcmorrow-ims.local` | Finance & Administration | `McMorrowIMS123!` |
+| `maintenance@mcmorrow-ims.local` | Finance & Administration | `McMorrowIMS123!` |
 
 Override the password with `SEED_DEMO_PASSWORD` in `.env.local` before seeding.
 
@@ -59,7 +59,7 @@ Priya (`employee@…`) reports to James (`manager@…`) so team training views h
 | `/training/assign`, `/training/my`, `/training/team` | Assignments |
 | `/projects`, `/suppliers`, `/maintenance`, `/audits` | Remaining modules |
 | `/documents` | Document library (module → record → files) |
-| `/admin` | Users, roles, permissions, departments, job titles, training config, documents, audit logs, settings |
+| `/admin` | Users, roles & permissions, departments, job titles, training config, documents, audit logs, settings (reminders, sites/plant list, project roles) |
 | `/profile`, `/profile/change-password` | Account |
 | `/login`, `/forgot-password`, `/reset-password` | Auth |
 

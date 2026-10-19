@@ -24,6 +24,25 @@ export const getJobTitles = cache(async (includeInactive = false) => {
   return data;
 });
 
+/** Sites (plant list). */
+export const getSites = cache(async (includeInactive = false) => {
+  const supabase = await createClient();
+  let q = supabase.from("sites").select("*").order("name");
+  if (!includeInactive) q = q.eq("is_active", true);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data;
+});
+
+export const getProjectRoles = cache(async (includeInactive = false) => {
+  const supabase = await createClient();
+  let q = supabase.from("project_roles").select("*").order("sort_order").order("name");
+  if (!includeInactive) q = q.eq("is_active", true);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data;
+});
+
 export const getTrainingLevels = cache(async (includeInactive = false) => {
   const supabase = await createClient();
   let q = supabase.from("training_levels").select("*").order("sort_order");

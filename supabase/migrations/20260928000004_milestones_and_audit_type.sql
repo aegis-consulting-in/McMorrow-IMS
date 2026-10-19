@@ -1,5 +1,5 @@
 -- =============================================================================
--- SkillHub QMS — Project milestones + audit type
+-- McMorrow IMS — Project milestones + audit type
 -- Migration 4 of 4
 -- =============================================================================
 

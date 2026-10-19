@@ -125,19 +125,11 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   },
   {
     key: "roles",
-    label: "Role Management",
-    description: "Create roles and assign permissions",
+    label: "Roles & Permissions",
+    description: "Create roles and choose the permissions each role grants",
     href: "/admin/roles",
     icon: ShieldIcon,
     permissions: [PERMISSIONS.admin.roles],
-  },
-  {
-    key: "permissions",
-    label: "Permission Management",
-    description: "Browse every permission grouped by module",
-    href: "/admin/permissions",
-    icon: ShieldIcon,
-    permissions: [PERMISSIONS.admin.permissions],
   },
   {
     key: "departments",
@@ -182,7 +174,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
     key: "settings",
     label: "System Settings",
-    description: "Application name, organisation and reminder configuration",
+    description: "Application name, reminders, sites (plants) and project roles",
     href: "/admin/settings",
     icon: SettingsIcon,
     permissions: [PERMISSIONS.admin.settings],

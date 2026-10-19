@@ -36,6 +36,7 @@ function toRow(input: ProjectInput) {
     name: input.name,
     description: input.description ?? null,
     manager_id: input.managerId ?? null,
+    site_id: input.siteId,
     ...rollupDates(input.milestones),
     actual_end_date: input.actualEndDate ?? null,
     status: input.status,

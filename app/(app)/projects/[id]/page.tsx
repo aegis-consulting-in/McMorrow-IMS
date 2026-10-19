@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { deleteProjectAction } from "@/lib/actions/projects";
 import { requireUser } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
-import { getEmployeeOptions } from "@/lib/data/master";
+import { getEmployeeOptions, getProjectRoles } from "@/lib/data/master";
 import { getProject, getProjectMembers } from "@/lib/data/projects";
 import { formatDate, formatDateTime } from "@/lib/format";
 
@@ -28,7 +28,11 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
 
   const isPM = Boolean(user.employee && project.manager_id === user.employee.id);
   const canEdit = user.can(PERMISSIONS.project.edit) || isPM;
-  const [members, employees] = await Promise.all([getProjectMembers(id), canEdit ? getEmployeeOptions() : Promise.resolve([])]);
+  const [members, employees, projectRoles] = await Promise.all([
+    getProjectMembers(id),
+    canEdit ? getEmployeeOptions() : Promise.resolve([]),
+    canEdit ? getProjectRoles() : Promise.resolve([]),
+  ]);
   const milestones = [...(project.milestones ?? [])].sort((a, b) => a.sort_order - b.sort_order);
 
   type Milestone = (typeof milestones)[number];
@@ -80,6 +84,10 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
                   "Unassigned"
                 ),
               },
+              {
+                label: "Plant location",
+                value: project.site ? `${project.site.name}${project.site.code ? ` (${project.site.code})` : ""}` : "—",
+              },
               { label: "Timeline", value: `${formatDate(project.start_date)} → ${formatDate(project.expected_end_date)}` },
               { label: "Actual end", value: formatDate(project.actual_end_date) },
               { label: "Created", value: formatDateTime(project.created_at) },
@@ -89,7 +97,7 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
           />
         </Section>
         <Section title="Team" description={`${members.length} member${members.length === 1 ? "" : "s"}`}>
-          <ProjectMembers projectId={project.id} members={members} employees={employees} canManage={canEdit} />
+          <ProjectMembers projectId={project.id} members={members} employees={employees} projectRoles={projectRoles} canManage={canEdit} />
         </Section>
       </div>
 

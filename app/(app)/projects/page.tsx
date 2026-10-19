@@ -48,6 +48,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
       ),
     },
     { key: "manager", header: "Manager", cell: (p) => (p.manager ? `${p.manager.first_name} ${p.manager.last_name}` : "—"), hideBelow: "md" },
+    { key: "site", header: "Plant location", cell: (p) => p.site?.name ?? "—", hideBelow: "md" },
     { key: "dates", header: "Timeline", cell: (p) => `${formatDate(p.start_date)} → ${formatDate(p.expected_end_date)}`, hideBelow: "lg" },
     { key: "priority", header: "Priority", cell: (p) => <StatusBadge status={p.priority} />, hideBelow: "sm" },
     { key: "status", header: "Status", cell: (p) => <StatusBadge status={p.status} /> },

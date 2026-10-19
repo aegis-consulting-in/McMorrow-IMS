@@ -6,7 +6,8 @@ import type { PaginationInput } from "@/lib/validation/common";
 
 export const PROJECT_LIST_SELECT = `
   *,
-  manager:employees!manager_id(id, first_name, last_name, email)
+  manager:employees!manager_id(id, first_name, last_name, email),
+  site:sites!site_id(id, name, code)
 ` as const;
 
 export const PROJECT_SELECT = `

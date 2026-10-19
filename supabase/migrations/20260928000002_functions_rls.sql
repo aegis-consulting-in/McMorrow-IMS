@@ -1,5 +1,5 @@
 -- =============================================================================
--- SkillHub QMS — Authorization helpers + Row Level Security
+-- McMorrow IMS — Authorization helpers + Row Level Security
 -- Migration 2 of 3
 --
 -- Every helper is SECURITY DEFINER so it can read the RBAC tables without being

@@ -1,4 +1,4 @@
-# Supabase setup for SkillHub
+# Supabase setup for McMorrow IMS
 
 You can create the Supabase project whenever you are ready. The application will not talk to a live database until `.env.local` is filled in; until then it only shows the `/setup` page.
 
@@ -10,7 +10,7 @@ This document is the full checklist: project, SQL, Storage, Auth URLs, environme
 
 1. Open [https://supabase.com/dashboard](https://supabase.com/dashboard) and sign in.
 2. **New project**.
-3. Choose an organisation, a name (for example `skillhub`), a strong database password (save it), and a region close to you.
+3. Choose an organisation, a name (for example `mcmorrow-ims`), a strong database password (save it), and a region close to you.
 4. Wait until the project is healthy.
 
 ---
@@ -49,6 +49,7 @@ The schema, functions, RLS policies and storage policies are in:
 | `supabase/migrations/20260928000004_milestones_and_audit_type.sql` | Project milestones and audit Internal/External type |
 | `supabase/migrations/20260928000005_maintenance_source.sql` | Preventive maintenance Internal/External source |
 | `supabase/migrations/20260928000006_rbac_org_roles.sql` | Org-chart roles (Finance & Admin, Construction, Quality) |
+| `supabase/migrations/20260928000007_sites_project_roles_reminders.sql` | Sites (plant list), project roles, project plant location, reminder lead days and From email |
 | `supabase/seed.sql` | Permissions, roles, role grants, departments, job titles, training levels/status, system settings |
 
 ### Option A — SQL editor (no CLI)
@@ -60,7 +61,8 @@ The schema, functions, RLS policies and storage policies are in:
 5. Paste and **Run** `20260928000004_milestones_and_audit_type.sql`.
 6. Paste and **Run** `20260928000005_maintenance_source.sql`.
 7. Paste and **Run** `20260928000006_rbac_org_roles.sql`.
-8. Paste and **Run** `supabase/seed.sql`.
+8. Paste and **Run** `20260928000007_sites_project_roles_reminders.sql`.
+9. Paste and **Run** `supabase/seed.sql`.
 
 Run them in that order. If a statement says a type or table already exists, you can ignore that run or start from a fresh project.
 
@@ -140,7 +142,7 @@ Master data (roles, permissions, departments) comes from `supabase/seed.sql`. **
 npm run seed
 ```
 
-That script needs `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. It creates the accounts listed in the README (default password `SkillHub123!`) plus sample trainings, assignments, a project, a supplier, a maintenance job and an audit.
+That script needs `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. It creates the accounts listed in the README (default password `McMorrowIMS123!`) plus sample trainings, assignments, a project, a supplier, a maintenance job and an audit.
 
 Re-running the seed updates those demo users rather than creating duplicates.
 
@@ -153,11 +155,11 @@ npm run dev
 ```
 
 1. Open `http://localhost:3000` — you should get `/login`, not `/setup`.
-2. Sign in as `admin@skillhub.local`.
+2. Sign in as `admin@mcmorrow-ims.local`.
 3. Home shows the six modules and four document folders.
-4. Open **Admin Settings → Roles** and confirm permissions.
+4. Open **Admin Settings → Roles & Permissions** and confirm permissions.
 5. Upload a PDF on a training detail page, then open it from **HR Documents**.
-6. Sign in as `employee@skillhub.local` and confirm **My Trainings** only, no Admin module.
+6. Sign in as `employee@mcmorrow-ims.local` and confirm **My Trainings** only, no Admin module.
 
 If login fails with “Invalid login credentials”, the seed has not run or the email provider is misconfigured.
 
