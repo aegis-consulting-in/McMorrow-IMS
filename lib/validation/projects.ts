@@ -34,9 +34,28 @@ export const projectSchema = z.object({
   priority: z.enum(PROJECT_PRIORITIES).default("medium"),
   notes: optionalText(5000),
   milestones: z.array(milestoneSchema).default([]),
+  /** Active preventive-maintenance assets used on this project (optional). */
+  assetIds: z.array(uuid).default([]),
+  /** Active suppliers working on this project (optional). */
+  supplierIds: z.array(uuid).default([]),
 });
 export type ProjectInput = z.infer<typeof projectSchema>;
 export const updateProjectSchema = z.object({ id: uuid }).and(projectSchema);
+
+export const TASK_STATUSES = ["open", "in_progress", "completed", "cancelled"] as const;
+
+export const projectTaskSchema = z.object({
+  projectId: uuid,
+  milestoneId: uuid,
+  title: requiredText("Task", 200),
+  description: optionalText(2000),
+  /** The employee tagged on the task. */
+  assigneeId: optionalUuid,
+  dueDate: optionalDate,
+  status: z.enum(TASK_STATUSES).default("open"),
+});
+export const updateProjectTaskSchema = projectTaskSchema.omit({ projectId: true, milestoneId: true }).extend({ id: uuid });
+export const setTaskStatusSchema = z.object({ id: uuid, status: z.enum(TASK_STATUSES) });
 
 export const projectMemberSchema = z.object({
   projectId: uuid,

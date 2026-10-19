@@ -10,10 +10,12 @@ import { AssetForm } from "./asset-form";
 export function AssetDialog({
   asset,
   departments,
+  sites,
   trigger = "button",
 }: {
   asset?: MaintenanceAssetRow;
   departments: { id: string; name: string }[];
+  sites: { id: string; name: string; is_active: boolean }[];
   trigger?: "button" | "icon";
 }) {
   const [open, setOpen] = useState(false);
@@ -34,7 +36,7 @@ export function AssetDialog({
             <DialogTitle>{asset ? `Edit ${asset.name}` : "New asset"}</DialogTitle>
             <DialogDescription>Equipment and instruments that require preventive maintenance.</DialogDescription>
           </DialogHeader>
-          <AssetForm asset={asset} departments={departments} onDone={() => setOpen(false)} />
+          <AssetForm asset={asset} departments={departments} sites={sites} onDone={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
     </>

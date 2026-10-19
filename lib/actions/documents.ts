@@ -6,9 +6,28 @@ import { createClient } from "@/lib/supabase/server";
 import { logAction } from "@/lib/audit-log";
 import { ForbiddenError, requirePermission } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
-import { DOCUMENTS_BUCKET, buildStoragePath } from "@/lib/documents/storage";
+import { DOCUMENTS_BUCKET, buildStoragePath, folderPrefix } from "@/lib/documents/storage";
 import { deleteDocumentSchema, finalizeUploadSchema, requestUploadSchema } from "@/lib/validation/documents";
 import { runAction, type ActionResult } from "./result";
+
+/** A milestone folder is only valid for project documents, and the milestone must belong to that project. */
+async function assertMilestoneBelongs(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  module: string,
+  entityId: string,
+  milestoneId: string | null | undefined,
+) {
+  if (!milestoneId) return;
+  if (module !== "project") throw new ForbiddenError("Milestone folders only exist for projects.");
+  const { data, error } = await supabase
+    .from("project_milestones")
+    .select("id")
+    .eq("id", milestoneId)
+    .eq("project_id", entityId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new ForbiddenError("That milestone does not belong to this project.");
+}
 
 /**
  * Step 1 of an upload. Verifies the caller may attach files to this entity
@@ -30,7 +49,9 @@ export async function requestUploadAction(
     if (accessError) throw accessError;
     if (!allowed) throw new ForbiddenError("You cannot upload documents to this record.");
 
-    const storagePath = buildStoragePath(data.module, data.entityId, `${randomUUID()}-${data.fileName}`);
+    await assertMilestoneBelongs(supabase, data.module, data.entityId, data.milestoneId);
+
+    const storagePath = buildStoragePath(data.module, data.entityId, `${randomUUID()}-${data.fileName}`, data.milestoneId);
 
     // Signed with the caller's session → storage RLS insert policy still applies.
     const { data: signed, error } = await supabase.storage.from(DOCUMENTS_BUCKET).createSignedUploadUrl(storagePath);
@@ -49,7 +70,9 @@ export async function finalizeUploadAction(input: unknown): Promise<ActionResult
     const user = await requirePermission(PERMISSIONS.documents.upload);
     const supabase = await createClient();
 
-    const expectedPrefix = `${data.module}/${data.entityId}/`;
+    await assertMilestoneBelongs(supabase, data.module, data.entityId, data.milestoneId);
+
+    const expectedPrefix = folderPrefix(data.module, data.entityId, data.milestoneId);
     if (!data.storagePath.startsWith(expectedPrefix)) throw new ForbiddenError("Storage path does not match the record.");
 
     // Confirm the object really exists (prevents metadata for phantom files).
@@ -70,6 +93,7 @@ export async function finalizeUploadAction(input: unknown): Promise<ActionResult
         module: data.module,
         entity_type: data.module,
         entity_id: data.entityId,
+        milestone_id: data.milestoneId ?? null,
         description: data.description ?? null,
         uploaded_by: user.id,
       })
@@ -84,6 +108,7 @@ export async function finalizeUploadAction(input: unknown): Promise<ActionResult
     await logAction(supabase, "document.uploaded", { type: "document", id: row.id }, {
       module: data.module,
       entity_id: data.entityId,
+      milestone_id: data.milestoneId ?? null,
       file_name: data.fileName,
       size: data.fileSize,
     });

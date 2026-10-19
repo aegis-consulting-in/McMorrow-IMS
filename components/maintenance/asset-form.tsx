@@ -18,7 +18,21 @@ import { assetSchema } from "@/lib/validation/maintenance";
 
 type Values = z.input<typeof assetSchema>;
 
-export function AssetForm({ asset, departments, onDone }: { asset?: MaintenanceAssetRow; departments: { id: string; name: string }[]; onDone?: () => void }) {
+type SiteOption = { id: string; name: string; is_active: boolean };
+
+export function AssetForm({
+  asset,
+  departments,
+  sites,
+  onDone,
+}: {
+  asset?: MaintenanceAssetRow;
+  departments: { id: string; name: string }[];
+  /** Site List (Admin → System Settings). Inactive sites are only offered if already on the asset. */
+  sites: SiteOption[];
+  onDone?: () => void;
+}) {
+  const availableSites = sites.filter((s) => s.is_active || s.id === asset?.site_id);
   const router = useRouter();
   const isEdit = Boolean(asset);
   const form = useForm<Values>({
@@ -31,6 +45,7 @@ export function AssetForm({ asset, departments, onDone }: { asset?: MaintenanceA
       manufacturer: asset?.manufacturer ?? "",
       location: asset?.location ?? "",
       departmentId: asset?.department_id ?? "",
+      siteId: asset?.site_id ?? "",
       purchaseDate: asset?.purchase_date ?? "",
       isActive: asset?.is_active ?? true,
     },
@@ -72,6 +87,17 @@ export function AssetForm({ asset, departments, onDone }: { asset?: MaintenanceA
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}
+              </option>
+            ))}
+          </NativeSelect>
+        </FormField>
+        <FormField label="Site" htmlFor="siteId" error={err("siteId")}>
+          <NativeSelect id="siteId" {...form.register("siteId")}>
+            <option value="">— None —</option>
+            {availableSites.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+                {s.is_active ? "" : " — inactive"}
               </option>
             ))}
           </NativeSelect>

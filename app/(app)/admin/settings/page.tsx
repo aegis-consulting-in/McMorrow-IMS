@@ -32,7 +32,7 @@ export default async function AdminSettingsPage() {
     <div className="flex flex-col gap-5">
       <PageHeader
         title="System Settings"
-        description="Application identity, reminders, sites (plants) and project roles."
+        description="Application identity, reminders, site list and project roles."
         crumbs={[{ label: "Admin", href: "/admin" }, { label: "Settings" }]}
       />
       <AdminNav can={(k) => user.can(k)} current="settings" />
@@ -49,7 +49,7 @@ export default async function AdminSettingsPage() {
         />
       </Section>
       <div className="grid gap-5 lg:grid-cols-2">
-        <Section title="Sites (plant list)" description="Plant locations that can be selected on projects.">
+        <Section title="Site List" description="Sites that can be selected on projects and assigned to assets.">
           <SiteManager sites={sites} />
         </Section>
         <Section title="Project roles" description="Roles a team member can hold on a project.">

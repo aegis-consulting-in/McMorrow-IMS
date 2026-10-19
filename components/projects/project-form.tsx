@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { FormError, FormField, FormGrid } from "@/components/ui/form-field";
+import { LinkPicker } from "@/components/projects/link-picker";
 import { createProjectAction, updateProjectAction } from "@/lib/actions/projects";
 import { useAction } from "@/lib/hooks/use-action";
 import { humanize } from "@/lib/format";
@@ -29,12 +30,22 @@ export function ProjectForm({
   project,
   employees,
   sites,
+  assets = [],
+  suppliers = [],
+  assetIds = [],
+  supplierIds = [],
   milestones = [],
 }: {
   project?: ProjectRow;
   employees: { id: string; first_name: string; last_name: string; employee_code: string }[];
-  /** Plant list from Admin → System Settings. Inactive sites are only offered if already on the project. */
+  /** Site List from Admin → System Settings. Inactive sites are only offered if already on the project. */
   sites: { id: string; name: string; code: string | null; is_active: boolean }[];
+  /** Active Preventive Maintenance assets that can be mapped to the project (optional). */
+  assets?: { id: string; asset_code: string; name: string; is_active: boolean; site: { name: string } | null }[];
+  /** Active suppliers that can be mapped to the project (optional). */
+  suppliers?: { id: string; code: string; name: string; status: string; category: string | null }[];
+  assetIds?: string[];
+  supplierIds?: string[];
   milestones?: Pick<ProjectMilestoneRow, "id" | "name" | "start_date" | "end_date" | "status">[];
 }) {
   const router = useRouter();
@@ -52,6 +63,8 @@ export function ProjectForm({
       status: project?.status ?? "planning",
       priority: project?.priority ?? "medium",
       notes: project?.notes ?? "",
+      assetIds,
+      supplierIds,
       milestones:
         milestones.length > 0
           ? milestones.map((m) => ({
@@ -94,7 +107,7 @@ export function ProjectForm({
           htmlFor="siteId"
           required
           error={err("siteId")}
-          hint={availableSites.length ? undefined : "No sites defined yet. Add them in Admin → System Settings → Sites."}
+          hint={availableSites.length ? undefined : "No sites defined yet. Add them in Admin → System Settings → Site List."}
         >
           <NativeSelect id="siteId" {...form.register("siteId")}>
             <option value="">— Select plant location —</option>
@@ -151,7 +164,9 @@ export function ProjectForm({
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-sm font-medium">Milestones</h2>
-            <p className="text-xs text-muted-foreground">Start and end dates belong to each milestone, not the project header.</p>
+            <p className="text-xs text-muted-foreground">
+              Start and end dates belong to each milestone, not the project header. Removing a milestone also removes its tasks.
+            </p>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={() => append(emptyMilestone)}>
             <PlusIcon />
@@ -205,6 +220,33 @@ export function ProjectForm({
             </FormGrid>
           </div>
         ))}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <LinkPicker
+          label="Assets"
+          options={assets.map((a) => ({
+            id: a.id,
+            label: `${a.asset_code} · ${a.name}`,
+            hint: a.site?.name,
+            inactive: !a.is_active,
+          }))}
+          value={form.watch("assetIds") ?? []}
+          onChange={(ids) => form.setValue("assetIds", ids, { shouldDirty: true })}
+          emptyText="No active assets yet. Register them under Preventive Maintenance."
+        />
+        <LinkPicker
+          label="Suppliers"
+          options={suppliers.map((s) => ({
+            id: s.id,
+            label: `${s.code} · ${s.name}`,
+            hint: s.category ?? undefined,
+            inactive: s.status !== "active",
+          }))}
+          value={form.watch("supplierIds") ?? []}
+          onChange={(ids) => form.setValue("supplierIds", ids, { shouldDirty: true })}
+          emptyText="No active suppliers yet. Add them under Supplier Management."
+        />
       </div>
 
       <FormField label="Description" htmlFor="description" error={err("description")}>

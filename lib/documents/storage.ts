@@ -2,9 +2,17 @@ import type { DocumentModule } from "@/lib/types/database";
 
 export const DOCUMENTS_BUCKET = "documents";
 
-/** Storage key convention: {module}/{entity_id}/{unique}-{file_name}. */
-export function buildStoragePath(module: DocumentModule, entityId: string, objectName: string) {
-  return `${module}/${entityId}/${objectName}`;
+/**
+ * Storage key convention: {module}/{entity_id}/{unique}-{file_name}.
+ * Project milestone files get a subfolder: project/{id}/milestones/{milestone_id}/{unique}-{file_name}.
+ */
+export function buildStoragePath(module: DocumentModule, entityId: string, objectName: string, milestoneId?: string | null) {
+  return `${folderPrefix(module, entityId, milestoneId)}${objectName}`;
+}
+
+/** Folder prefix (with trailing slash) objects must live under. */
+export function folderPrefix(module: DocumentModule, entityId: string, milestoneId?: string | null) {
+  return milestoneId ? `${module}/${entityId}/milestones/${milestoneId}/` : `${module}/${entityId}/`;
 }
 
 export const MODULE_LABELS: Record<DocumentModule, string> = {

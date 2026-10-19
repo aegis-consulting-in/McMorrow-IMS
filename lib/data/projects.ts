@@ -79,6 +79,72 @@ export async function getProject(id: string) {
   return { ...data, milestones };
 }
 
+/** Active assets for the project form; already-mapped inactive ones stay listed so they are not dropped on save. */
+export async function getAssetPickerOptions(keepIds: string[] = []) {
+  const supabase = await createClient();
+  let q = supabase.from("maintenance_assets").select("id, asset_code, name, is_active, site:sites(id, name)").order("name");
+  q = keepIds.length ? q.or(`is_active.eq.true,id.in.(${keepIds.join(",")})`) : q.eq("is_active", true);
+  const { data, error } = await q;
+  if (error) throw error;
+  return data;
+}
+
+/** Active suppliers for the project form; already-mapped inactive ones stay listed. */
+export async function getSupplierPickerOptions(keepIds: string[] = []) {
+  const supabase = await createClient();
+  let q = supabase.from("suppliers").select("id, code, name, status, category").is("deleted_at", null).order("name");
+  q = keepIds.length ? q.or(`status.eq.active,id.in.(${keepIds.join(",")})`) : q.eq("status", "active");
+  const { data, error } = await q;
+  if (error) throw error;
+  return data;
+}
+
+export async function getProjectMilestones(projectId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_milestones")
+    .select("id, name, start_date, end_date, status, sort_order")
+    .eq("project_id", projectId)
+    .order("sort_order");
+  if (error) throw error;
+  return data;
+}
+
+export async function getProjectTasks(projectId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_tasks")
+    .select("*, assignee:employees!assignee_id(id, first_name, last_name, employee_code)")
+    .eq("project_id", projectId)
+    .order("sort_order")
+    .order("created_at");
+  if (error) throw error;
+  return data;
+}
+
+/** Assets mapped to the project (RLS lets project people see them even without maintenance.view). */
+export async function getProjectAssets(projectId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_assets")
+    .select("asset_id, added_at, asset:maintenance_assets(id, asset_code, name, is_active, site:sites(id, name))")
+    .eq("project_id", projectId)
+    .order("added_at");
+  if (error) throw error;
+  return data;
+}
+
+export async function getProjectSuppliers(projectId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_suppliers")
+    .select("supplier_id, added_at, supplier:suppliers(id, code, name, status)")
+    .eq("project_id", projectId)
+    .order("added_at");
+  if (error) throw error;
+  return data;
+}
+
 export async function getProjectMembers(projectId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase

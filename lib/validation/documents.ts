@@ -37,6 +37,8 @@ const safeFileName = z
 export const requestUploadSchema = z.object({
   module: z.enum(DOCUMENT_MODULES),
   entityId: uuid,
+  /** Project documents only: upload into this milestone's subfolder. */
+  milestoneId: uuid.nullish(),
   fileName: safeFileName,
   mimeType: z.enum(ALLOWED_MIME_TYPES, { message: "This file type is not allowed." }),
   fileSize: z
@@ -51,6 +53,7 @@ export type RequestUploadInput = z.infer<typeof requestUploadSchema>;
 export const finalizeUploadSchema = z.object({
   module: z.enum(DOCUMENT_MODULES),
   entityId: uuid,
+  milestoneId: uuid.nullish(),
   storagePath: z.string().min(1).max(500),
   fileName: safeFileName,
   mimeType: z.enum(ALLOWED_MIME_TYPES),

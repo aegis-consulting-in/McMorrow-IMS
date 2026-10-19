@@ -45,6 +45,8 @@ export async function uploadFileToEntity(
   entityId: string,
   file: File,
   onProgress?: (pct: number) => void,
+  /** Project documents only: upload into this milestone's subfolder. */
+  milestoneId?: string | null,
 ): Promise<string | null> {
   const invalid = validateFile(file);
   if (invalid) return invalid;
@@ -54,6 +56,7 @@ export async function uploadFileToEntity(
   const req = await requestUploadAction({
     module,
     entityId,
+    milestoneId: milestoneId ?? undefined,
     fileName: file.name,
     mimeType,
     fileSize: file.size,
@@ -77,6 +80,7 @@ export async function uploadFileToEntity(
   const fin = await finalizeUploadAction({
     module,
     entityId,
+    milestoneId: milestoneId ?? undefined,
     storagePath: req.data.storagePath,
     fileName: file.name,
     mimeType,

@@ -14,6 +14,7 @@ export const assetSchema = z.object({
   manufacturer: optionalText(120),
   location: optionalText(120),
   departmentId: optionalUuid,
+  siteId: optionalUuid,
   purchaseDate: optionalDate,
   isActive: checkbox.default(true),
 });

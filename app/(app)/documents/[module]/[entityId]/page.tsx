@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FileList } from "@/components/documents/file-list";
 import { FileUpload } from "@/components/documents/file-upload";
+import { ProjectDocuments } from "@/components/projects/project-documents";
 import { PageHeader, Section } from "@/components/shared/page-header";
+import { getProjectMilestones } from "@/lib/data/projects";
 import { requirePagePermission } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getEntityDocuments, resolveEntityNames } from "@/lib/data/documents";
@@ -39,12 +41,16 @@ export default async function DocumentEntityPage({ params }: PageProps<"/documen
           </Link>
         }
       />
-      <Section>
-        <div className="flex flex-col gap-4">
-          {user.can(PERMISSIONS.documents.upload) ? <FileUpload module={docModule} entityId={entityId} compact /> : null}
-          <FileList files={files} canDownload={user.can(PERMISSIONS.documents.download)} canDelete={user.can(PERMISSIONS.documents.delete)} />
-        </div>
-      </Section>
+      {docModule === "project" ? (
+        <ProjectDocuments projectId={entityId} milestones={await getProjectMilestones(entityId)} title="Files" />
+      ) : (
+        <Section>
+          <div className="flex flex-col gap-4">
+            {user.can(PERMISSIONS.documents.upload) ? <FileUpload module={docModule} entityId={entityId} compact /> : null}
+            <FileList files={files} canDownload={user.can(PERMISSIONS.documents.download)} canDelete={user.can(PERMISSIONS.documents.delete)} />
+          </div>
+        </Section>
+      )}
     </div>
   );
 }

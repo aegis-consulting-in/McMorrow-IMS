@@ -3,14 +3,14 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { PaginationInput } from "@/lib/validation/common";
 
-export const ASSET_SELECT = `*, department:departments(id, name)` as const;
+export const ASSET_SELECT = `*, department:departments(id, name), site:sites(id, name)` as const;
 export const RECORD_SELECT = `
   *,
   asset:maintenance_assets(id, asset_code, name, location),
   assignee:employees!assigned_to(id, first_name, last_name)
 ` as const;
 
-export async function listAssets(filters: PaginationInput & { departmentId?: string; status?: "active" | "inactive" | "all" }) {
+export async function listAssets(filters: PaginationInput & { departmentId?: string; siteId?: string; status?: "active" | "inactive" | "all" }) {
   const supabase = await createClient();
   const from = (filters.page - 1) * filters.pageSize;
   const to = from + filters.pageSize - 1;
@@ -21,6 +21,7 @@ export async function listAssets(filters: PaginationInput & { departmentId?: str
     q = q.or(`name.ilike.${term},asset_code.ilike.${term},serial_number.ilike.${term},location.ilike.${term}`);
   }
   if (filters.departmentId) q = q.eq("department_id", filters.departmentId);
+  if (filters.siteId) q = q.eq("site_id", filters.siteId);
   if (filters.status === "inactive") q = q.eq("is_active", false);
   else if (filters.status !== "all") q = q.eq("is_active", true);
 

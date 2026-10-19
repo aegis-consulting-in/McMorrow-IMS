@@ -11,7 +11,7 @@ import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { BooleanBadge, StatusBadge } from "@/components/shared/status-badge";
 import { requirePagePermission } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
-import { getDepartments } from "@/lib/data/master";
+import { getDepartments, getSites } from "@/lib/data/master";
 import { getAssetOptions, getMaintenanceStats, listAssets, listMaintenanceRecords } from "@/lib/data/maintenance";
 import { formatDate, fullName, humanize, isOverdue } from "@/lib/format";
 import { paginationSchema } from "@/lib/validation/common";
@@ -31,11 +31,14 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
   const assetStatus = (typeof params.assetStatus === "string" ? params.assetStatus : "active") as "active" | "inactive" | "all";
   const departmentId = typeof params.department === "string" ? params.department : undefined;
 
-  const [stats, departments, records, assets, assetOptions] = await Promise.all([
+  const siteId = typeof params.site === "string" ? params.site : undefined;
+
+  const [stats, departments, sites, records, assets, assetOptions] = await Promise.all([
     getMaintenanceStats(),
     getDepartments(),
+    getSites(true),
     tab === "records" ? listMaintenanceRecords({ ...filters, status, type, source, assetId }) : Promise.resolve({ rows: [], total: 0 }),
-    tab === "assets" ? listAssets({ ...filters, departmentId, status: assetStatus }) : Promise.resolve({ rows: [], total: 0 }),
+    tab === "assets" ? listAssets({ ...filters, departmentId, siteId, status: assetStatus }) : Promise.resolve({ rows: [], total: 0 }),
     tab === "records" ? getAssetOptions() : Promise.resolve([]),
   ]);
 
@@ -83,6 +86,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
         </div>
       ),
     },
+    { key: "site", header: "Site", cell: (a) => a.site?.name ?? "—", hideBelow: "sm" },
     { key: "location", header: "Location", cell: (a) => a.location ?? "—", hideBelow: "md" },
     { key: "department", header: "Department", cell: (a) => a.department?.name ?? "—", hideBelow: "lg" },
     { key: "active", header: "In service", cell: (a) => <BooleanBadge value={a.is_active} trueLabel="In service" falseLabel="Out of service" />, hideBelow: "sm" },
@@ -93,7 +97,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
       cell: (a) =>
         user.can(PERMISSIONS.maintenance.edit) ? (
           <div className="flex justify-end">
-            <AssetDialog asset={a} departments={departments} trigger="icon" />
+            <AssetDialog asset={a} departments={departments} sites={sites} trigger="icon" />
           </div>
         ) : null,
     },
@@ -107,7 +111,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
         crumbs={[{ label: "Maintenance" }]}
         actions={
           <>
-            {user.can(PERMISSIONS.maintenance.create) ? <AssetDialog departments={departments} /> : null}
+            {user.can(PERMISSIONS.maintenance.create) ? <AssetDialog departments={departments} sites={sites} /> : null}
             {user.can(PERMISSIONS.maintenance.create) ? (
               <Button render={<Link href="/maintenance/new" />}>
                 <PlusIcon /> New record
@@ -178,6 +182,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
                 ariaLabel="Asset status"
               />
               <FilterSelect param="department" placeholder="All departments" options={departments.map((d) => ({ value: d.id, label: d.name }))} ariaLabel="Department" />
+              <FilterSelect param="site" placeholder="All sites" options={sites.map((s) => ({ value: s.id, label: s.name }))} ariaLabel="Site" />
               <SortSelect
                 options={[
                   { value: "name", label: "Name" },
@@ -185,7 +190,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
                   { value: "location", label: "Location" },
                 ]}
               />
-              <ClearFilters keys={["q", "assetStatus", "department", "sort", "dir"]} />
+              <ClearFilters keys={["q", "assetStatus", "department", "site", "sort", "dir"]} />
             </ListToolbar>
             <DataTable columns={assetColumns} rows={assets.rows} rowKey={(r) => r.id} emptyTitle="No assets" emptyDescription="Register equipment that needs preventive maintenance." />
             <Pagination page={filters.page} pageSize={filters.pageSize} total={assets.total} />

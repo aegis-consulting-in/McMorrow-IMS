@@ -31,6 +31,7 @@ export type MaintenanceSource = "internal" | "external";
 export type AuditStatus = "planned" | "in_progress" | "completed" | "closed";
 export type AuditType = "internal" | "external";
 export type MilestoneStatus = "planned" | "in_progress" | "completed" | "cancelled";
+export type TaskStatus = "open" | "in_progress" | "completed" | "cancelled";
 export type FindingSeverity = "observation" | "minor" | "major" | "critical";
 export type FindingStatus = "open" | "in_progress" | "closed";
 export type CorrectiveActionStatus = "open" | "in_progress" | "completed" | "verified" | "cancelled";
@@ -186,6 +187,22 @@ export type ProjectMilestoneRow = Timestamps & {
   created_by: string | null;
 };
 
+export type ProjectTaskRow = Timestamps & {
+  id: string;
+  project_id: string;
+  milestone_id: string;
+  title: string;
+  description: string | null;
+  assignee_id: string | null;
+  status: TaskStatus;
+  due_date: string | null;
+  sort_order: number;
+  created_by: string | null;
+};
+
+export type ProjectAssetRow = { project_id: string; asset_id: string; added_by: string | null; added_at: string };
+export type ProjectSupplierRow = { project_id: string; supplier_id: string; added_by: string | null; added_at: string };
+
 export type SupplierRow = Timestamps & {
   id: string;
   code: string;
@@ -215,6 +232,7 @@ export type MaintenanceAssetRow = Timestamps & {
   manufacturer: string | null;
   location: string | null;
   department_id: string | null;
+  site_id: string | null;
   purchase_date: string | null;
   is_active: boolean;
   created_by: string | null;
@@ -293,6 +311,8 @@ export type DocumentRow = Timestamps & {
   module: DocumentModule;
   entity_type: string;
   entity_id: string;
+  /** Project documents only: the milestone subfolder, or null for the project root. */
+  milestone_id: string | null;
   description: string | null;
   uploaded_by: string | null;
 };
@@ -445,6 +465,31 @@ export type Database = {
         Optional<ProjectMilestoneRow, Generated | "start_date" | "end_date" | "status" | "sort_order" | "created_by">,
         [{ foreignKeyName: "project_milestones_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] }]
       >;
+      project_tasks: Table<
+        ProjectTaskRow,
+        Optional<ProjectTaskRow, Generated | "description" | "assignee_id" | "status" | "due_date" | "sort_order" | "created_by">,
+        [
+          { foreignKeyName: "project_tasks_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_tasks_milestone_id_fkey"; columns: ["milestone_id"]; isOneToOne: false; referencedRelation: "project_milestones"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_tasks_assignee_id_fkey"; columns: ["assignee_id"]; isOneToOne: false; referencedRelation: "employees"; referencedColumns: ["id"] },
+        ]
+      >;
+      project_assets: Table<
+        ProjectAssetRow,
+        Optional<ProjectAssetRow, "added_by" | "added_at">,
+        [
+          { foreignKeyName: "project_assets_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_assets_asset_id_fkey"; columns: ["asset_id"]; isOneToOne: false; referencedRelation: "maintenance_assets"; referencedColumns: ["id"] },
+        ]
+      >;
+      project_suppliers: Table<
+        ProjectSupplierRow,
+        Optional<ProjectSupplierRow, "added_by" | "added_at">,
+        [
+          { foreignKeyName: "project_suppliers_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_suppliers_supplier_id_fkey"; columns: ["supplier_id"]; isOneToOne: false; referencedRelation: "suppliers"; referencedColumns: ["id"] },
+        ]
+      >;
       suppliers: Table<
         SupplierRow,
         Optional<
@@ -479,12 +524,14 @@ export type Database = {
           | "manufacturer"
           | "location"
           | "department_id"
+          | "site_id"
           | "purchase_date"
           | "is_active"
           | "created_by"
         >,
         [
           { foreignKeyName: "maintenance_assets_department_id_fkey"; columns: ["department_id"]; isOneToOne: false; referencedRelation: "departments"; referencedColumns: ["id"] },
+          { foreignKeyName: "maintenance_assets_site_id_fkey"; columns: ["site_id"]; isOneToOne: false; referencedRelation: "sites"; referencedColumns: ["id"] },
         ]
       >;
       maintenance_records: Table<
@@ -558,7 +605,7 @@ export type Database = {
       >;
       documents: Table<
         DocumentRow,
-        Optional<DocumentRow, Generated | "bucket" | "description" | "uploaded_by">,
+        Optional<DocumentRow, Generated | "bucket" | "milestone_id" | "description" | "uploaded_by">,
         [
           { foreignKeyName: "documents_uploaded_by_fkey"; columns: ["uploaded_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ]
@@ -598,6 +645,7 @@ export type Database = {
       audit_status: AuditStatus;
       audit_type: AuditType;
       milestone_status: MilestoneStatus;
+      task_status: TaskStatus;
       finding_severity: FindingSeverity;
       finding_status: FindingStatus;
       corrective_action_status: CorrectiveActionStatus;

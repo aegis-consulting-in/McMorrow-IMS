@@ -59,7 +59,7 @@ Priya (`employee@…`) reports to James (`manager@…`) so team training views h
 | `/training/assign`, `/training/my`, `/training/team` | Assignments |
 | `/projects`, `/suppliers`, `/maintenance`, `/audits` | Remaining modules |
 | `/documents` | Document library (module → record → files) |
-| `/admin` | Users, roles & permissions, departments, job titles, training config, documents, audit logs, settings (reminders, sites/plant list, project roles) |
+| `/admin` | Users, roles & permissions, departments, job titles, training config, documents, audit logs, settings (reminders, site list, project roles) |
 | `/profile`, `/profile/change-password` | Account |
 | `/login`, `/forgot-password`, `/reset-password` | Auth |
 

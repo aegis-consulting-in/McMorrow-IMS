@@ -5,7 +5,7 @@ import { requirePagePermission } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { AssetDialog } from "@/components/maintenance/asset-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
-import { getDepartments, getEmployeeOptions } from "@/lib/data/master";
+import { getDepartments, getEmployeeOptions, getSites } from "@/lib/data/master";
 import { getAssetOptions } from "@/lib/data/maintenance";
 
 export const metadata: Metadata = { title: "New maintenance record" };
@@ -14,7 +14,7 @@ export default async function NewMaintenanceRecordPage({ searchParams }: PagePro
   await requirePagePermission(PERMISSIONS.maintenance.create);
   const params = await searchParams;
   const assetId = typeof params.assetId === "string" ? params.assetId : undefined;
-  const [assets, employees, departments] = await Promise.all([getAssetOptions(), getEmployeeOptions(), getDepartments()]);
+  const [assets, employees, departments, sites] = await Promise.all([getAssetOptions(), getEmployeeOptions(), getDepartments(), getSites(true)]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -26,7 +26,7 @@ export default async function NewMaintenanceRecordPage({ searchParams }: PagePro
           <EmptyState
             title="Register an asset first"
             description="Maintenance records are attached to an asset. Add equipment, then schedule the job."
-            action={<AssetDialog departments={departments} />}
+            action={<AssetDialog departments={departments} sites={sites} />}
           />
         )}
       </Section>

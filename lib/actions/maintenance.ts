@@ -25,6 +25,7 @@ function assetToRow(input: AssetInput) {
     manufacturer: input.manufacturer ?? null,
     location: input.location ?? null,
     department_id: input.departmentId ?? null,
+    site_id: input.siteId ?? null,
     purchase_date: input.purchaseDate ?? null,
     is_active: input.isActive,
   };

@@ -174,7 +174,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
     key: "settings",
     label: "System Settings",
-    description: "Application name, reminders, sites (plants) and project roles",
+    description: "Application name, reminders, site list and project roles",
     href: "/admin/settings",
     icon: SettingsIcon,
     permissions: [PERMISSIONS.admin.settings],

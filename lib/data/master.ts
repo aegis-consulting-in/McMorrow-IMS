@@ -24,7 +24,7 @@ export const getJobTitles = cache(async (includeInactive = false) => {
   return data;
 });
 
-/** Sites (plant list). */
+/** Site List. */
 export const getSites = cache(async (includeInactive = false) => {
   const supabase = await createClient();
   let q = supabase.from("sites").select("*").order("name");

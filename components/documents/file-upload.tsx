@@ -29,12 +29,15 @@ const ACCEPT = ALLOWED_EXTENSIONS.map((e) => `.${e}`).join(",");
 export function FileUpload({
   module,
   entityId,
+  milestoneId,
   onUploaded,
   className,
   compact = false,
 }: {
   module: DocumentModule;
   entityId: string;
+  /** Project documents only: upload into this milestone's subfolder. */
+  milestoneId?: string;
   onUploaded?: () => void;
   className?: string;
   compact?: boolean;
@@ -50,7 +53,7 @@ export function FileUpload({
   const uploadOne = useCallback(
     async (item: QueuedFile) => {
       update(item.id, { status: "uploading", progress: 5 });
-      const error = await uploadFileToEntity(module, entityId, item.file, (pct) => update(item.id, { progress: pct }));
+      const error = await uploadFileToEntity(module, entityId, item.file, (pct) => update(item.id, { progress: pct }), milestoneId);
       if (error) {
         update(item.id, { status: "error", error });
         return false;
@@ -58,7 +61,7 @@ export function FileUpload({
       update(item.id, { status: "done", progress: 100 });
       return true;
     },
-    [module, entityId],
+    [module, entityId, milestoneId],
   );
 
   const addFiles = useCallback(

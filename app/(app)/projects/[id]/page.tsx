@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DocumentsPanel } from "@/components/documents/documents-panel";
+import { MilestoneTasks } from "@/components/projects/milestone-tasks";
+import { ProjectDocuments } from "@/components/projects/project-documents";
 import { ProjectGantt } from "@/components/projects/project-gantt";
 import { ProjectMembers } from "@/components/projects/project-members";
 import { ProjectsViewToggle } from "@/components/projects/projects-view-toggle";
-import { DataTable, DetailList, type Column } from "@/components/shared/data-table";
+import { DetailList } from "@/components/shared/data-table";
 import { EntityActions } from "@/components/shared/entity-actions";
 import { PageHeader, Section } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -13,7 +14,7 @@ import { deleteProjectAction } from "@/lib/actions/projects";
 import { requireUser } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getEmployeeOptions, getProjectRoles } from "@/lib/data/master";
-import { getProject, getProjectMembers } from "@/lib/data/projects";
+import { getProject, getProjectAssets, getProjectMembers, getProjectSuppliers, getProjectTasks } from "@/lib/data/projects";
 import { formatDate, formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Project" };
@@ -28,20 +29,15 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
 
   const isPM = Boolean(user.employee && project.manager_id === user.employee.id);
   const canEdit = user.can(PERMISSIONS.project.edit) || isPM;
-  const [members, employees, projectRoles] = await Promise.all([
+  const [members, employees, projectRoles, tasks, projectAssets, projectSuppliers] = await Promise.all([
     getProjectMembers(id),
     canEdit ? getEmployeeOptions() : Promise.resolve([]),
     canEdit ? getProjectRoles() : Promise.resolve([]),
+    getProjectTasks(id),
+    getProjectAssets(id),
+    getProjectSuppliers(id),
   ]);
   const milestones = [...(project.milestones ?? [])].sort((a, b) => a.sort_order - b.sort_order);
-
-  type Milestone = (typeof milestones)[number];
-  const milestoneColumns: Column<Milestone>[] = [
-    { key: "name", header: "Milestone", cell: (m) => <span className="font-medium">{m.name}</span> },
-    { key: "start", header: "Start date", cell: (m) => formatDate(m.start_date), hideBelow: "sm" },
-    { key: "end", header: "End date", cell: (m) => formatDate(m.end_date), hideBelow: "sm" },
-    { key: "status", header: "Status", cell: (m) => <StatusBadge status={m.status} /> },
-  ];
 
   return (
     <div className="flex flex-col gap-5">
@@ -126,17 +122,88 @@ export default async function ProjectDetailPage({ params, searchParams }: PagePr
             ]}
           />
         ) : (
-          <DataTable
-            columns={milestoneColumns}
-            rows={milestones}
-            rowKey={(m) => m.id}
-            emptyTitle="No milestones yet"
-            emptyDescription="Add milestones when you edit this project. Dates sit against each milestone."
+          <MilestoneTasks
+            projectId={project.id}
+            milestones={milestones}
+            tasks={tasks}
+            employees={employees}
+            canEdit={canEdit}
+            currentEmployeeId={user.employee?.id ?? null}
           />
         )}
       </Section>
 
-      <DocumentsPanel module="project" entityId={project.id} title="Project documents" />
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Section title="Assets" description="Preventive Maintenance assets used on this project.">
+          {projectAssets.length ? (
+            <ul className="divide-y rounded-lg border text-sm">
+              {projectAssets.map((pa) => (
+                <li key={pa.asset_id} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">
+                      {pa.asset ? (
+                        user.can(PERMISSIONS.maintenance.view) ? (
+                          <Link href={`/maintenance?tab=assets&q=${encodeURIComponent(pa.asset.asset_code)}`} className="hover:underline">
+                            {pa.asset.name}
+                          </Link>
+                        ) : (
+                          pa.asset.name
+                        )
+                      ) : (
+                        "Asset"
+                      )}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {[pa.asset?.asset_code, pa.asset?.site?.name].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                  {pa.asset && !pa.asset.is_active ? <StatusBadge status="inactive" /> : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No assets mapped.{canEdit ? " Choose assets when you edit this project." : ""}
+            </p>
+          )}
+        </Section>
+        <Section title="Suppliers" description="Suppliers working on this project.">
+          {projectSuppliers.length ? (
+            <ul className="divide-y rounded-lg border text-sm">
+              {projectSuppliers.map((ps) => (
+                <li key={ps.supplier_id} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">
+                      {ps.supplier ? (
+                        user.can(PERMISSIONS.supplier.view) ? (
+                          <Link href={`/suppliers/${ps.supplier.id}`} className="hover:underline">
+                            {ps.supplier.name}
+                          </Link>
+                        ) : (
+                          ps.supplier.name
+                        )
+                      ) : (
+                        "Supplier"
+                      )}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">{ps.supplier?.code}</p>
+                  </div>
+                  {ps.supplier && ps.supplier.status !== "active" ? <StatusBadge status={ps.supplier.status} /> : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No suppliers mapped.{canEdit ? " Choose suppliers when you edit this project." : ""}
+            </p>
+          )}
+        </Section>
+      </div>
+
+      <ProjectDocuments
+        projectId={project.id}
+        milestones={milestones.map((m) => ({ id: m.id, name: m.name, start_date: m.start_date, end_date: m.end_date }))}
+      />
     </div>
   );
 }

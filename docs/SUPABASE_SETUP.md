@@ -49,7 +49,8 @@ The schema, functions, RLS policies and storage policies are in:
 | `supabase/migrations/20260928000004_milestones_and_audit_type.sql` | Project milestones and audit Internal/External type |
 | `supabase/migrations/20260928000005_maintenance_source.sql` | Preventive maintenance Internal/External source |
 | `supabase/migrations/20260928000006_rbac_org_roles.sql` | Org-chart roles (Finance & Admin, Construction, Quality) |
-| `supabase/migrations/20260928000007_sites_project_roles_reminders.sql` | Sites (plant list), project roles, project plant location, reminder lead days and From email |
+| `supabase/migrations/20260928000007_sites_project_roles_reminders.sql` | Site List, project roles, project plant location, reminder lead days and From email |
+| `supabase/migrations/20260928000008_project_tasks_mappings_asset_sites.sql` | Milestone tasks, project-to-asset/supplier mapping, asset sites, milestone-level documents |
 | `supabase/seed.sql` | Permissions, roles, role grants, departments, job titles, training levels/status, system settings |
 
 ### Option A — SQL editor (no CLI)
@@ -62,7 +63,8 @@ The schema, functions, RLS policies and storage policies are in:
 6. Paste and **Run** `20260928000005_maintenance_source.sql`.
 7. Paste and **Run** `20260928000006_rbac_org_roles.sql`.
 8. Paste and **Run** `20260928000007_sites_project_roles_reminders.sql`.
-9. Paste and **Run** `supabase/seed.sql`.
+9. Paste and **Run** `20260928000008_project_tasks_mappings_asset_sites.sql`.
+10. Paste and **Run** `supabase/seed.sql`.
 
 Run them in that order. If a statement says a type or table already exists, you can ignore that run or start from a fresh project.
 

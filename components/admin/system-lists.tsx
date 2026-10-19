@@ -69,7 +69,7 @@ export function SiteManager({ sites }: { sites: Site[] }) {
       <div className="flex justify-end">
         <SiteDialog />
       </div>
-      <DataTable columns={columns} rows={sites} rowKey={(r) => r.id} emptyTitle="No sites yet" emptyDescription="Add the plants or sites your projects run at." />
+      <DataTable columns={columns} rows={sites} rowKey={(r) => r.id} emptyTitle="No sites yet" emptyDescription="Add the sites your projects and assets belong to." />
     </div>
   );
 }
